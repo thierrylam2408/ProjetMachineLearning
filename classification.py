@@ -1,16 +1,7 @@
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
-# retourne dict genre:id, id = int
-def load_genres(filename):
-    f = open(filename,"r")
-    dict_genre = {}
-    for i in f:
-        t = i.split(",")
-        t[1] = t[1].rstrip()
-        dict_genre[t[0]] = t[1]
-    return dict_genre
+import parseur
 
 # retourne liste de mots "utile"
 def process_words(overview):
@@ -31,7 +22,7 @@ def load_data(filename,genre_list):
     ratio_dict = {} # genre:(l0,l1) pour chaque genre
     for i in genre_list:
         ratio_dict[i] = ([],[])
-    print(genre_list)
+    #print(genre_list)
     for i in f:
         i = i.rstrip()
         tab = i.split('||')
@@ -92,7 +83,7 @@ def naive_bayes_train(x):
 
 # entraine 1 classifier pour chaque genre
 def all_training(genre_file,movie_file):
-    genre_list = load_genres(genre_file)
+    genre_list = parseur.load_genres(genre_file)
     x = load_data(movie_file,genre_list)
     words = x[0]
 
@@ -112,18 +103,19 @@ def naive_bayes_predict(genre_file,movie_file,overview):
     c = all_training(genre_file,movie_file)
     words = c[0]
     classifier_dict = c[1] #  genre:[ratio,y_genre,n_genre]
-    genre_dict = load_genres(genre_file)
+    genre_dict = parseur.load_genres(genre_file)
 
     tmp_list = process_words(overview)
-    print(tmp_list)
+    #print(tmp_list)
 
     words_list = []
     for i in tmp_list:
         if i in words:
             words_list.append(words[i])
 
-    print(words_list)
+    #print(words_list)
 
+    genres_result = []
     for i in classifier_dict:
 
         p_y = 1 # proba que l'overview appartienne au genre i
@@ -140,8 +132,10 @@ def naive_bayes_predict(genre_file,movie_file,overview):
         genre = genre_dict[i]
         if p_y > p_n:
             print("Type " + genre + " n° " + str(i) + ": OUI")
+            genres_result.append(str(i))
         else:
             print("Type " + genre + ": NON")
+    return genres_result
 
 
 def test():
