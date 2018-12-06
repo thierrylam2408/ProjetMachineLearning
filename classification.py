@@ -98,9 +98,13 @@ def all_training(genre_file,movie_file):
         classifier_dict[i] = [t[0],t[1],t[2]]
     return (words,classifier_dict)
 
+
+c = None
 # prédit pour 1 overview
 def naive_bayes_predict(genre_file,movie_file,overview):
-    c = all_training(genre_file,movie_file)
+    global c
+    if(c == None ):
+        c = all_training(genre_file,movie_file)
     words = c[0]
     classifier_dict = c[1] #  genre:[ratio,y_genre,n_genre]
     genre_dict = parseur.load_genres(genre_file)
