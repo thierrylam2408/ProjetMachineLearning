@@ -1,14 +1,17 @@
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.stem.porter import PorterStemmer
 import parseur
 
 # retourne liste de mots "utile"
 def process_words(overview):
+    porter = PorterStemmer()
     tokens = word_tokenize(overview)
     stop_words = set(stopwords.words('english'))
-    words = [w for w in tokens if w.isalpha() and w not in stop_words] # enléve ponctuation + stop_words
-    return words
+    words = [w.lower() for w in tokens if w.isalpha() and w not in stop_words] # enléve ponctuation + stop_words + minuscule
+    stemmed = [porter.stem(word) for word in words]
+    return stemmed
 
 # format du fichier: id||titre||overview||genre1,genre2...
 # format d'un film (id,titre,[mot1,mot2...],[genre1,genre2...])
