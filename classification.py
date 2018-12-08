@@ -3,6 +3,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
 import parseur
+import operator
 
 # retourne liste de mots "utile"
 def process_words(overview):
@@ -121,7 +122,7 @@ def naive_bayes_predict(genre_file,movie_file,overview):
             words_list.append(words[i])
 
     #print(words_list)
-
+    genres_prob = dict()
     genres_result = []
     for i in classifier_dict:
 
@@ -142,11 +143,16 @@ def naive_bayes_predict(genre_file,movie_file,overview):
             genres_result.append(str(i))
         else:
             print("Type " + genre + ": NON")
-    return genres_result
+        genres_prob[str(i)] = p_n
+    genres_prob = sorted(genres_prob.items(), key=operator.itemgetter(1))
+    genres_prob = list(filter(lambda a: a[1] != 0, genres_prob))
+    return [couple[0] for couple in genres_prob[0:3]]
 
 
 def test():
-	test1 = "After a gentle alien becomes stranded on Earth, the being is discovered and befriended by a young boy named Elliott. Bringing the extraterrestrial into his suburban California house, Elliott introduces E.T., as the alien is dubbed, to his brother and his little sister, Gertie, and the children decide to keep its existence a secret. Soon, however, E.T. falls ill, resulting in government intervention and a dire situation for both Elliott and the alien."
-	test2 = "Gellert Grindelwald has escaped imprisonment and has begun gathering followers to his cause—elevating wizards above all non-magical beings. The only one capable of putting a stop to him is the wizard he once called his closest friend, Albus Dumbledore. However, Dumbledore will need to seek help from the wizard who had thwarted Grindelwald once before, his former student Newt Scamander, who agrees to help, unaware of the dangers that lie ahead. Lines are drawn as love and loyalty are tested, even among the truest friends and family, in an increasingly divided wizarding world."
-	test3 = "On July 2, a giant alien mothership enters orbit around Earth and deploys several dozen saucer-shaped 'destroyer' spacecraft that quickly lay waste to major cities around the planet. On July 3, the United States conducts a coordinated counterattack that fails. On July 4, a plan is devised to gain access to the interior of the alien mothership in space, in order to plant a nuclear missile."
-	print(naive_bayes_predict("genres_file","data",test1))
+    #train
+    test1 = "After a gentle alien becomes stranded on Earth, the being is discovered and befriended by a young boy named Elliott. Bringing the extraterrestrial into his suburban California house, Elliott introduces E.T., as the alien is dubbed, to his brother and his little sister, Gertie, and the children decide to keep its existence a secret. Soon, however, E.T. falls ill, resulting in government intervention and a dire situation for both Elliott and the alien."
+	#eval
+    test2 = "Steve Freeling lives with his wife, Diane, and their three children, Dana, Robbie, and Carol Anne, in Southern California where he sells houses for the company that built the neighborhood. It starts with just a few odd occurrences, such as broken dishes and furniture moving around by itself. However, when he realizes that something truly evil haunts his home, Steve calls in a team of parapsychologists led by Dr. Lesh to help before it's too late."
+    test3 = "In April of 1945, Germany stands at the brink of defeat with the Russian Army closing in from the east and the Allied Expeditionary Force attacking from the west. In Berlin, capital of the Third Reich, Adolf Hitler proclaims that Germany will still achieve victory and orders his generals and advisers to fight to the last man. When the end finally does come, and Hitler lies dead by his own hand, what is left of his military must find a way to end the killing that is the Battle of Berlin, and lay down their arms in surrender."
+    print(naive_bayes_predict("genres_file","echantillon_train",test3))
