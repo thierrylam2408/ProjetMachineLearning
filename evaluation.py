@@ -19,13 +19,14 @@ def naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil):
 	predictSuccessfull = 0
 	predictTotal = 0
 	for data in data_eval:
-		if(idsEnCommun( 
-			classification.naive_bayes_predict("genres_file","echantillon_train", data[parseur.fields.index("overview")]), 
-			data[parseur.fields.index("genres")]) >= seuil):
-				print("ok")
-				predictSuccessfull = predictSuccessfull + 1
-		else: print("pas ok")
-		predictTotal = predictTotal + 1
+		if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
+			if(idsEnCommun( 
+				classification.naive_bayes_predict("genres_file","echantillon_train", data[parseur.fields.index("overview")]), 
+				data[parseur.fields.index("genres")]) >= seuil):
+					print("ok")
+					predictSuccessfull = predictSuccessfull + 1
+			else: print("pas ok")
+			predictTotal = predictTotal + 1
 	return predictSuccessfull / predictTotal
 
 
@@ -36,14 +37,15 @@ def naive_bayes_eval_recall_precision_par_genres(data_eval):
   num_actual_and_predicted_genres = dict.fromkeys(genres, 0)
   recalls_precisions = []
   for data in data_eval:
-    predicts = classification.naive_bayes_predict("genres_file", "echantillon_train", data[parseur.fields.index("overview")])
-    for genre in parseur.load_genres("genres_file"):
-      if genre in predicts:
-        num_predicted_genres[genre] += 1
+    if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
+      predicts = classification.naive_bayes_predict("genres_file", "echantillon_train", data[parseur.fields.index("overview")])
+      for genre in parseur.load_genres("genres_file"):
+        if genre in predicts:
+          num_predicted_genres[genre] += 1
+          if genre in data[parseur.fields.index("genres")]:
+            num_actual_and_predicted_genres[genre] += 1
         if genre in data[parseur.fields.index("genres")]:
-          num_actual_and_predicted_genres[genre] += 1
-      if genre in data[parseur.fields.index("genres")]:
-        num_actual_genres[genre] += 1
+          num_actual_genres[genre] += 1
   return [ (num_actual_and_predicted_genres[i] / num_actual_genres[i] if num_actual_genres[i] else 1.0,
   	num_actual_and_predicted_genres[i] / num_predicted_genres[i] if num_predicted_genres[i] else 1.0) for i in genres.keys() ]
 
@@ -55,10 +57,6 @@ def idsEnCommun(ids_pred, ids_eval):
 	print("IdsGenre en vrai:")
 	print(*ids_eval)
 	return len([i for i in ids_pred if i in ids_eval]) / len(ids_eval)
-
-#pourcentage d'ids en trop par rapport a ceux l'ensemble de predition
-def idsEnTrop(ids_pred, ids_eval):
-	return len([i for i in ids_pred if i not in ids_eval]) / len(ids_pred)
 
 
 def test():
