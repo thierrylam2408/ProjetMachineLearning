@@ -6,14 +6,21 @@ import parseur
 #cat data_eval | head -50000 > echantillon_eval
 
 #genere deux datasets depuis un dataset complet pour l'entrainement(80%) et l'evaluation(20%)
+#Si la ligne ne contient pas toutes les données, on l'ignore
+#Retourne le nb de ligne ignoré
 def split_lines(input, seed, train_file, eval_file):
 	random.seed(seed)
 	p1 = open(train_file, "w")
 	p2 = open(eval_file, "w")
+	nb_filtre = 0
 	for line in open(input, "r").readlines():
-		if(random.random() < 0.8):
-			p1.write(line)
-		else: p2.write(line)
+		tab = line.rstrip().split('||')
+		if(len(tab) == 4 and tab[3] != "" and tab[2]!= "" and tab[1] != "" and tab[0] !=""):
+			if(random.random() < 0.8):
+				p1.write(line)
+			else: p2.write(line)
+		else: nb_filtre += 1
+	return nb_filtre
 
 def naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil):
 	predictSuccessfull = 0
@@ -21,7 +28,7 @@ def naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil):
 	for data in data_eval:
 		if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
 			if(idsEnCommun( 
-				classification.naive_bayes_predict("genres_file","echantillon_train", data[parseur.fields.index("overview")]), 
+				classification.naive_bayes_predict("genres_file","data_train", data[parseur.fields.index("overview")]), 
 				data[parseur.fields.index("genres")]) >= seuil):
 					print("ok")
 					predictSuccessfull = predictSuccessfull + 1
@@ -38,7 +45,7 @@ def naive_bayes_eval_recall_precision_par_genres(data_eval):
   recalls_precisions = []
   for data in data_eval:
     if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
-      predicts = classification.naive_bayes_predict("genres_file", "echantillon_train", data[parseur.fields.index("overview")])
+      predicts = classification.naive_bayes_predict("genres_file", "data_train", data[parseur.fields.index("overview")])
       for genre in parseur.load_genres("genres_file"):
         if genre in predicts:
           num_predicted_genres[genre] += 1
@@ -62,8 +69,8 @@ def idsEnCommun(ids_pred, ids_eval):
 def test():
 	#print(idsEnCommun(["41","1","6","8","2","411"], ["6","411", "2"])) #tous les genres sont trouves
 
-	#split_lines("data", 30, "data_train", "data_eval")
-	data_eval = parseur.getFilms("echantillon_eval")
+	#print(split_lines("data", 30, "data_train", "data_eval"))
+	data_eval = parseur.getFilms("data_eval")
 	seuil = 0.5
-	print("avec un seuil de "+str(seuil)+" on a "+ str(naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil)*100)+"% de reussite")
-	#print(naive_bayes_eval_recall_precision_par_genres(data_eval))
+	#print("avec un seuil de "+str(seuil)+" on a "+ str(naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil)*100)+"% de reussite")
+	print(naive_bayes_eval_recall_precision_par_genres(data_eval))

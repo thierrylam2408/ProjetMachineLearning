@@ -50,7 +50,6 @@ def load_data(filename,genre_list):
                     (ratio_dict[i])[0].append(t)
                 else:
                     (ratio_dict[i])[1].append(t)
-
     return (words,ratio_dict)
 
 # pour chaque mot, retourne sa fréquence dans liste_movie
@@ -155,4 +154,5 @@ def test():
 	#eval
     test2 = "Steve Freeling lives with his wife, Diane, and their three children, Dana, Robbie, and Carol Anne, in Southern California where he sells houses for the company that built the neighborhood. It starts with just a few odd occurrences, such as broken dishes and furniture moving around by itself. However, when he realizes that something truly evil haunts his home, Steve calls in a team of parapsychologists led by Dr. Lesh to help before it's too late."
     test3 = "In April of 1945, Germany stands at the brink of defeat with the Russian Army closing in from the east and the Allied Expeditionary Force attacking from the west. In Berlin, capital of the Third Reich, Adolf Hitler proclaims that Germany will still achieve victory and orders his generals and advisers to fight to the last man. When the end finally does come, and Hitler lies dead by his own hand, what is left of his military must find a way to end the killing that is the Battle of Berlin, and lay down their arms in surrender."
-    print(naive_bayes_predict("genres_file","echantillon_train",test3))
+    #print(naive_bayes_predict("genres_file","data_train",test3))
+    load_data("echantillon_train", "genres_file")
