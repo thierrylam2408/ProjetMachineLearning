@@ -1,7 +1,8 @@
 import classification
 import random
 import parseur
-
+import matplotlib.pyplot as plt
+import pandas as pd
 
 #cat data_eval | head -50000 > echantillon_eval
 
@@ -27,8 +28,8 @@ def naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil, data_train
 	predictTotal = 0
 	for data in data_eval:
 		if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
-			if(idsEnCommun( 
-				classification.naive_bayes_predict2("genres_file", data_train, data[parseur.fields.index("overview")]), 
+			if(idsEnCommun(
+				classification.naive_bayes_predict2("genres_file", data_train, data[parseur.fields.index("overview")]),
 				data[parseur.fields.index("genres")]) >= seuil):
 					print("ok")
 					predictSuccessfull = predictSuccessfull + 1
@@ -64,7 +65,20 @@ def idsEnCommun(ids_pred, ids_eval):
 	print("IdsGenre en vrai:")
 	print(*ids_eval)
 	return len([i for i in ids_pred if i in ids_eval]) / len(ids_eval)
+def generate_histo(title, values):
 
+	X = []
+	Y = []
+	Z = []
+
+	for i in values:
+		X.append(i[0])
+		Y.append(i[1])
+		Z.append(i[2])
+		df = pd.DataFrame(np.c_[Y,Z], index=X)
+	df.plot.bar()
+
+	plt.show()
 
 def test():
 	#print(idsEnCommun(["41","1","6","8","2","411"], ["6","411", "2"])) #tous les genres sont trouves
