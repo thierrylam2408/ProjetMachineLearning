@@ -104,7 +104,45 @@ def all_training(genre_file,movie_file):
 
 c = None
 # prédit pour 1 overview
-def naive_bayes_predict(genre_file,movie_file,overview):
+#on garde les p_y > p_n
+def naive_bayes_predict1(genre_file,movie_file,overview):
+    global c
+    if(c == None ):
+        c = all_training(genre_file,movie_file)
+    words = c[0]
+    classifier_dict = c[1] #  genre:[ratio,y_genre,n_genre]
+    genre_dict = parseur.load_genres(genre_file)
+
+    tmp_list = process_words(overview)
+    #print(tmp_list)
+
+    words_list = []
+    for i in tmp_list:
+        if i in words:
+            words_list.append(words[i])
+
+    #print(words_list)
+    genres_result = []
+    for i in classifier_dict:
+
+        p_y = 1 # proba que l'overview appartienne au genre i
+        p_n = 1 # proba que l'overview n'appartienne pas au genre i
+
+        genre_ratio = (classifier_dict[i])[0]
+        y_genre = (classifier_dict[i])[1]
+        n_genre = (classifier_dict[i])[2]
+        for j in words_list:
+            p_y = float(p_y * y_genre[j])
+            p_n = float(p_n * n_genre[j])
+        p_y = p_y*genre_ratio
+        p_n = p_n*(1-genre_ratio)
+        genre = genre_dict[i]
+        if p_y > p_n:
+            genres_result.append(str(i))
+    return genres_result
+
+#on ordonne pour chaque genre, leur p_n et on garde les 3 plus petites
+def naive_bayes_predict2(genre_file,movie_file,overview):
     global c
     if(c == None ):
         c = all_training(genre_file,movie_file)
@@ -137,11 +175,6 @@ def naive_bayes_predict(genre_file,movie_file,overview):
         p_y = p_y*genre_ratio
         p_n = p_n*(1-genre_ratio)
         genre = genre_dict[i]
-        if p_y > p_n:
-            print("Type " + genre + " n° " + str(i) + ": OUI")
-            genres_result.append(str(i))
-        else:
-            print("Type " + genre + ": NON")
         genres_prob[str(i)] = p_n
     genres_prob = sorted(genres_prob.items(), key=operator.itemgetter(1))
     genres_prob = list(filter(lambda a: a[1] != 0, genres_prob))
