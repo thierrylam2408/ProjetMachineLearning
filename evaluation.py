@@ -35,7 +35,7 @@ def naive_bayes_eval(data_eval, seuil, data_train, prediction):
 	for data in data_eval:
 		if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
 			predicts = prediction("genres_file", data_train, data[parseur.fields.index("overview")])
-			if(idsEnCommun(prediction,data[parseur.fields.index("genres")]) >= seuil):
+			if(idsEnCommun(predicts,data[parseur.fields.index("genres")]) >= seuil):
 					print("ok")
 					predictSuccessfull = predictSuccessfull + 1
 			else: print("pas ok")
