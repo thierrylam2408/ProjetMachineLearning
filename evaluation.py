@@ -3,6 +3,7 @@ import random
 import parseur
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 #cat data_eval | head -50000 > echantillon_eval
 
@@ -23,40 +24,32 @@ def split_lines(input, seed, train_file, eval_file):
 		else: nb_filtre += 1
 	return nb_filtre
 
-def naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil, data_train):
+def naive_bayes_eval(data_eval, seuil, data_train, prediction):
 	predictSuccessfull = 0
 	predictTotal = 0
+	genres = parseur.load_genres("genres_file")
+	num_predicted_genres = dict.fromkeys(genres, 0)
+	num_actual_genres = dict.fromkeys(genres, 0)
+	num_actual_and_predicted_genres = dict.fromkeys(genres, 0)
+	recalls_precisions = []
 	for data in data_eval:
 		if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
-			if(idsEnCommun(
-				classification.naive_bayes_predict2("genres_file", data_train, data[parseur.fields.index("overview")]),
-				data[parseur.fields.index("genres")]) >= seuil):
+			predicts = prediction("genres_file", data_train, data[parseur.fields.index("overview")])
+			if(idsEnCommun(prediction,data[parseur.fields.index("genres")]) >= seuil):
 					print("ok")
 					predictSuccessfull = predictSuccessfull + 1
 			else: print("pas ok")
 			predictTotal = predictTotal + 1
-	return predictSuccessfull / predictTotal
-
-
-def naive_bayes_eval_recall_precision_par_genres(data_eval, data_train):
-  genres = parseur.load_genres("genres_file")
-  num_predicted_genres = dict.fromkeys(genres, 0)
-  num_actual_genres = dict.fromkeys(genres, 0)
-  num_actual_and_predicted_genres = dict.fromkeys(genres, 0)
-  recalls_precisions = []
-  for data in data_eval:
-    if (data[parseur.fields.index("genres")] != [''] and data[parseur.fields.index("overview")] != ""):
-      predicts = classification.naive_bayes_predict2("genres_file", data_train, data[parseur.fields.index("overview")])
-      for genre in parseur.load_genres("genres_file"):
-        if genre in predicts:
-          num_predicted_genres[genre] += 1
-          if genre in data[parseur.fields.index("genres")]:
-            num_actual_and_predicted_genres[genre] += 1
-        if genre in data[parseur.fields.index("genres")]:
-          num_actual_genres[genre] += 1
-  return [ (genre, num_actual_and_predicted_genres[i] / num_actual_genres[i] if num_actual_genres[i] else 1.0,
-  	num_actual_and_predicted_genres[i] / num_predicted_genres[i] if num_predicted_genres[i] else 1.0) for (i,genre) in genres.items() ]
-
+			for genre in parseur.load_genres("genres_file"):
+				if genre in predicts:
+					num_predicted_genres[genre] += 1
+			if genre in data[parseur.fields.index("genres")]:
+				num_actual_and_predicted_genres[genre] += 1
+			if genre in data[parseur.fields.index("genres")]:
+				num_actual_genres[genre] += 1
+	return (predictSuccessfull / predictTotal, 
+		[ (genre, num_actual_and_predicted_genres[i] / num_actual_genres[i] if num_actual_genres[i] else 1.0,
+  	num_actual_and_predicted_genres[i] / num_predicted_genres[i] if num_predicted_genres[i] else 1.0) for (i,genre) in genres.items() ])
 
 #pourcentage de bonnes predictions par rapport aux veritables genres
 def idsEnCommun(ids_pred, ids_eval):
@@ -88,4 +81,6 @@ def test():
 	data_train = "echantillon_train"
 	seuil = 2/3
 	#print("avec un seuil de "+str(seuil)+" on a "+ str(naive_bayes_eval_pourcentage_de_bonnes_reponses(data_eval, seuil,data_train)*100)+"% de reussite")
-	print(naive_bayes_eval_recall_precision_par_genres(data_eval, data_train))
+	ev = naive_bayes_eval(data_eval, seuil, data_train, classification.naive_bayes_predict2)
+	print(ev[0])
+	generate_histo("title",eval[1])
