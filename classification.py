@@ -71,16 +71,16 @@ def naive_bayes_train(x):
 
     ratio = float(len(x[1])/ (len(x[1])+ len(x[2]))) # ratio de film contenant ce genre dans le dataset => P(genre)
 
-    spamicity = [0] * len(x[0])
-    no_spamicity = [0] * len(x[0])
+    l0 = [0] * len(x[0])
+    l1 = [0] * len(x[0])
     s = compute_frequencies(len(x[0]),x[1]) # frequence d'apparition des mots dans les films qui ont le genre ciblé => P(word|genre)
     s1 = compute_frequencies(len(x[0]),x[2])
     all_sms = compute_frequencies(len(x[0]),x[1]+x[2]) # fréquence d'apparition des mots dans l'ensemble des films du dataset => P(word)
 
     for i in range(len(x[0])):
-        spamicity[i] = float(s[i]/all_sms[i]) # P(word|genre) / P(word)
-        no_spamicity[i] = float(s1[i]/all_sms[i]) # P(word| (not)genre) / P(word)
-    return (ratio,spamicity,no_spamicity)
+        l0[i] = float(s[i]/all_sms[i]) # P(word|genre) / P(word)
+        l1[i] = float(s1[i]/all_sms[i]) # P(word| (not)genre) / P(word)
+    return (ratio,l0,l1)
 
 
 
